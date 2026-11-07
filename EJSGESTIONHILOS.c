@@ -222,3 +222,63 @@ int main(int argc, char *argv[]) {
 
     pthread_exit(0);
 }
+
+//EJERCICIO 4
+
+/*Implementa un programa que genere un vector de MAX numeros enteros aleatorios ´
+comprendidos entre 0 y 9. A continuacion buscar ´ a secuencialmente en dicho vector ´
+el numero que se le pasa como primer argumento. El programa debe crear tantos ´
+hilos como se le indique en el segundo argumento. Y cada hilo ha de realizar la
+busqueda en un fragmento consecutivo del vector de un tama ´ no aproximadamente ˜
+igual para todos los hilos. As´ı, si denotamos por N al numero total de hilos a ´
+crear, el primero de ellos buscara en las posiciones ´ 0,1,...,(MAX div N)-1,
+el segundo en (MAX div N),(MAX div N)+1,...,2*(MAX div N)-1
+y as´ı sucesivamente. Una vez que un hilo encuentre el numero, todos los hilos ´
+finalizaran la b ´ usqueda. El hilo principal esperar ´ a a que acaben todos los hilos y ´
+mostrara por pantalla el ´ ´ındice de una posicion en la que est ´ e el n ´ umero ´ o -1 si el ´
+numero no est ´ a en el vector. ´
+Puedes tomar como referencia los ejercicios 13 y 14 de las tansparencias as´ı como
+el siguiente programa, que genera un vector de 20 numeros aleatorios:
+´
+    #include <stdio.h>
+    #include <unistd.h>
+    #include <stdlib.h>
+    #include <time.h>
+
+    #define MAX 20
+
+    int main()
+    {   time_t t;
+        int i, v[MAX];
+
+        srandom(time(&t)); // Genera semilla para no crear siempre
+                            // los mismos n´umeros aleatorios
+        for (i=0;i<MAX;i++)
+        {   v[i]=random()%10; // Crea un n´umero aleatorio entre 0 y 9
+            printf("V[%d]=%d\n",i,v[i]);
+        }
+        exit(0);
+    }
+
+Un ejemplo de la ejecucion del programa podr ´ ´ıa ser la siguiente:
+
+$ $1 7 5
+VECTOR
+V[0]=3
+V[1]=8
+...
+V[15]=8
+V[16]=7
+V[17]=8
+V[18]=6
+V[19]=2
+
+Hilo 0: Buscar´a entre las componenetes 0 y 3
+Hilo 1: Buscar´a entre las componenetes 4 y 7
+Hilo 2: Buscar´a entre las componenetes 8 y 11
+Hilo 3: Buscar´a entre las componenetes 12 y 15
+Hilo 4: Buscar´a entre las componenetes 16 y 19
+****Hilo 3035712368: Encuentra el n´umero en V[16]
+El n´umero 7 est´a en la posici´on 16 (V[16]=7)
+$
+ */
