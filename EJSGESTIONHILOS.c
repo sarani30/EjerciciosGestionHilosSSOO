@@ -262,23 +262,122 @@ el siguiente programa, que genera un vector de 20 numeros aleatorios:
 
 Un ejemplo de la ejecucion del programa podr ´ ´ıa ser la siguiente:
 
-$ $1 7 5
-VECTOR
-V[0]=3
-V[1]=8
-...
-V[15]=8
-V[16]=7
-V[17]=8
-V[18]=6
-V[19]=2
+    $ $1 7 5
+    VECTOR
+    V[0]=3
+    V[1]=8
+    ...
+    V[15]=8
+    V[16]=7
+    V[17]=8
+    V[18]=6
+    V[19]=2
 
-Hilo 0: Buscar´a entre las componenetes 0 y 3
-Hilo 1: Buscar´a entre las componenetes 4 y 7
-Hilo 2: Buscar´a entre las componenetes 8 y 11
-Hilo 3: Buscar´a entre las componenetes 12 y 15
-Hilo 4: Buscar´a entre las componenetes 16 y 19
-****Hilo 3035712368: Encuentra el n´umero en V[16]
-El n´umero 7 est´a en la posici´on 16 (V[16]=7)
-$
+    Hilo 0: Buscar´a entre las componenetes 0 y 3
+    Hilo 1: Buscar´a entre las componenetes 4 y 7
+    Hilo 2: Buscar´a entre las componenetes 8 y 11
+    Hilo 3: Buscar´a entre las componenetes 12 y 15
+    Hilo 4: Buscar´a entre las componenetes 16 y 19
+    ****Hilo 3035712368: Encuentra el n´umero en V[16]
+    El n´umero 7 est´a en la posici´on 16 (V[16]=7)
+    $
  */
+
+#include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <time.h> //para generar los números aleatorios
+
+#define MAX 20 //numero de componentes del vector
+
+int v[MAX]; //para que todos los hilos puedan mirar el vector
+
+//Datos compartidos por todos los hilos
+//parametros por hilo
+typedef struct {
+    int n;
+    int id;
+    int ini;
+    int fin;
+} parametros;
+
+void *buscar_numero(void *arg) {
+    int pos = -1; //posicion del número en el vector
+    parametros p = *(parametros *) arg;
+    free(arg);
+
+    for (int i = p.ini; i <= p.fin; i++) {
+        if (v[i] == p.n) {
+            pos = i;
+            printf("****Hilo %lu: Encuentra el número %d en V[%d]\n", pthread_self(), p.n, pos);
+            break;
+        }
+    }
+
+    pthread_exit((void *) pos);
+}
+
+int main(int argc, char *argv[]) {
+
+    int i; //indice y el vector de tamaño 20
+    int dimbloque;
+    int *res;
+
+    //Comprobación de argumentos
+    if (argc < 3) {
+        perror("Argumentos insuficientes");
+        exit(-1);
+    }
+
+    //Número a buscar
+    int num = atoi(argv[1]);
+
+    //Número de hilos (Especificado en el segundo argumento)
+    int nhilos = atoi(argv[2]);
+    pthread_t hilos[nhilos];
+
+    //dimensión de números del vector que cada hilo debe de buscar
+    dimbloque= MAX / nhilos;
+
+
+    //generar el vector
+    time_t t;
+    srandom(time(&t)); // Genera semilla para no crear siempre
+                        // los mismos n´umeros aleatorios
+    for (i=0;i<MAX;i++)
+    {   v[i]=random()%10; // Crea un n´umero aleatorio entre 0 y 9
+        printf("V[%d]=%d\n",i,v[i]); //MUESTRA EL VECTOR
+    }
+
+    //crear los hilos
+    for (i = 0; i < nhilos; i++) {
+        parametros *p = (parametros *) malloc(sizeof(parametros));
+
+        //número a buscar
+        p->n = num;
+
+        p->id = i; //pasamos el número de hilo
+        p->ini = i * dimbloque; //el inicio
+
+        if (i < (nhilos-1)) p->fin = p->ini + dimbloque - 1; //hilos intermedios deben de ocuparse de cada parte igual
+        else p->fin = MAX - 1; //el último hilo debe de ocuparse de todos los que queden
+
+        pthread_create(&hilos[i], NULL, &buscar_numero, (void *) p);
+
+        //mensaje inicial
+        printf("Hilo %d: Buscará entre las componentes %d y %d\n", p->id, p->ini, p->fin);
+    }
+
+    //ejecución de los hilos
+    for (i = 0; i < nhilos; i++) {
+        pthread_join(hilos[i], (void **) &res);
+        int resultado  = (int) res;
+        if (resultado != -1) {
+            break;
+        }
+
+    }
+
+    exit(0);
+}
