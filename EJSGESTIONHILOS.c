@@ -82,3 +82,67 @@ int main(int argc, char * argv[]) {
 
 }
 
+// EJERCICIO 2
+
+/* Modifica el programa anterior para que no se mezclen las impresiones de los diferentes hilos. Una posible solucion consistir ´ ´ıa en que cada hilo devolviese al hilo
+principal, mediante la funcion´ pthread exit, el resultado que ha calculado y
+que el hilo principal lo imprima a continuacion. ´
+Puedes tomar como referencia el ejemplo 6 de las tansparencias.*/
+
+#include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+void *factorial(void *arg) {
+
+    //pasar el argumento a entero mediante cast
+    int numero = *(int *) arg;
+
+    //resultado
+    int fact = 1;
+
+    //calcular el factorial de ese número
+    for (int i = 1; i < numero; i++) {
+        fact *= i;
+    }
+
+    //retornar el valor a la función principal
+    pthread_exit((void *) fact);
+
+}
+
+
+int main(int argc, char *argv[]) {
+
+    int i, *resultado; //indice de los bucles y el valor de retorno (el factorial)
+
+    //Comprobación de número de argumentos
+    if (argc < 2) {
+        perror("Argumentos insuficientes");
+        exit(-1);
+    }
+
+    //Número de hilos necesarios
+    int nhilos = argc - 1;
+
+    //vector de hilos
+    pthread_t hilos[nhilos];
+
+    //almacenar los datos
+    int datos[nhilos];
+
+    //crear los hilos
+    for (i = 0; i < nhilos; i++) {
+        datos[i] = atoi(argv[1+i]);
+        pthread_create(&hilos[i], NULL, &factorial, (void *) &datos[i]);
+    }
+
+    //ejecución de los hilos
+    for (i = 0; i< nhilos; i++) {
+        pthread_join(&hilos[i], (void *) &resultado);
+        printf("Factorial de %d es $d\n", datos[i], *resultado);
+    }
+
+    pthread_exit(0);
+}
