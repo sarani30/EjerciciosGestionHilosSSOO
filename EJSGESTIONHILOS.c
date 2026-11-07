@@ -100,11 +100,12 @@ void *factorial(void *arg) {
     int numero = *(int *) arg;
 
     //resultado
-    int fact = 1;
+    int *fact = (int *) malloc(sizeof(int));
+    *fact = 1;
 
     //calcular el factorial de ese número
     for (int i = 1; i <= numero; i++) {
-        fact *= i;
+        *fact *= i;
     }
 
     //retornar el valor a la función principal
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
 
     //ejecución de los hilos
     for (i = 0; i< nhilos; i++) {
-        pthread_join(hilos[i], (void *) &resultado);
+        pthread_join(hilos[i], (void **) &resultado);
         printf("Factorial de %d es %d\n", datos[i], *resultado);
     }
 
@@ -173,12 +174,51 @@ $ pot2 5
 $
  */
 
+#include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <math.h> //AÑADIDA PARA CALCULAR LA POTENCIA
 
 void *pot2(void *arg) {
+    //pasar el argumento a entero
+    int numero = *(int *) arg;
 
+    // Reservar memoria en el heap para devolver el resultado
+    int *resultado = (int *) malloc(sizeof(int));
+    //calcular el resultado
+    *resultado = pow(2, numero);
+
+    pthread_exit((void *) resultado);
 
 }
 
 int main(int argc, char *argv[]) {
     int i, *resultado;
+
+    //Número de hilos
+    int nhilos = atoi(argv[1]);
+
+    //variable hilos
+    pthread_t hilos[nhilos];
+
+    //vector de índices de las potencias
+    int vi[nhilos];
+
+    //creación de los hilos
+    for (i = 0; i < nhilos; i++) {
+        vi[i] = i;
+        pthread_create(&hilos[i], NULL, &pot2, (void * ) &vi[i]);
+    }
+
+    //ejecución de los hilos
+    for (i = 0; i < nhilos; i++) {
+        pthread_join(hilos[i], (void **) &resultado);
+        printf("2 ^ %d = %d\n", vi[i], *resultado);
+
+        // LIBERACIÓN OBLIGATORIA DE LA MEMORIA RESERVADA POR CADA HILO
+        free(resultado);
+    }
+
+    pthread_exit(0);
 }
