@@ -36,18 +36,18 @@ void *factorial(void *arg) {
     int resultado = 1;
 
     //calcular el factorial
-    for (int i = 1; i < numero; i++) {
+    for (int i = 1; i <= numero; i++) {
         resultado *= i;
     }
 
-    printf("El factorial de %d es $d\n", numero, resultado);
+    printf("El factorial de %d es %d\n", numero, resultado);
 
     //Salida del hilo
     pthread_exit(0);
 
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
 
     int i, nhilos;
 
@@ -103,7 +103,7 @@ void *factorial(void *arg) {
     int fact = 1;
 
     //calcular el factorial de ese número
-    for (int i = 1; i < numero; i++) {
+    for (int i = 1; i <= numero; i++) {
         fact *= i;
     }
 
@@ -140,8 +140,8 @@ int main(int argc, char *argv[]) {
 
     //ejecución de los hilos
     for (i = 0; i< nhilos; i++) {
-        pthread_join(&hilos[i], (void *) &resultado);
-        printf("Factorial de %d es $d\n", datos[i], *resultado);
+        pthread_join(hilos[i], (void *) &resultado);
+        printf("Factorial de %d es %d\n", datos[i], *resultado);
     }
 
     pthread_exit(0);
