@@ -146,3 +146,39 @@ int main(int argc, char *argv[]) {
 
     pthread_exit(0);
 }
+
+//EJERCICIO 3
+
+/* Implementa un programa que calcule una secuencia de potencias de 2. El programa
+creara tantos hilos como se especifique en su ´ unico argumento. Y cada hilo calcu- ´
+lara la potencia de 2 de un n ´ umero que se le pasa como argumento. El primer hilo ´
+recibira 0 como argumento y calcular ´ a´ 2
+0
+. El segundo hilo, 2
+1
+. El tercero, 2
+2 y as´ı
+sucesivamente. El hilo principal mostrara por pantalla el resultado calculado por ´
+cada hilo subordinado.
+Puedes tomar como referencia los ejemplos 4 y 6 de las tansparencias.
+Un ejemplo de la ejecucion del programa podr ´ ´ıa ser la siguiente:
+1
+
+$ pot2 5
+2 ˆ 0: 1
+2 ˆ 1: 2
+2 ˆ 2: 4
+2 ˆ 3: 8
+2 ˆ 4: 16
+$
+ */
+
+
+void *pot2(void *arg) {
+
+
+}
+
+int main(int argc, char *argv[]) {
+    int i, *resultado;
+}
