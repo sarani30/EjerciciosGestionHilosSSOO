@@ -593,34 +593,40 @@ $ cat max_vector.c
 
     #define VSIZE 2000000 // Problem size
 
-    int num_threads, subvector_dim;
     int v [VSIZE];
-    int vmax [MAX_NUMTHREADS];
-    int index_v [MAX_NUMTHREADS];
+
+    typedef struct {
+        int ini;
+        int fin;
+        int id;
+    } parametros;
 
     void *f_max(void *arg)
     {
-        int i, begin_v, end_v, nthread, max_for_thread;
-        nthread = *(int *)arg;
-        begin_v = nthread * subvector_dim;
-        if ( nthread == (num_threads-1) ) end_v = VSIZE - 1;
-        else end_v = begin_v + subvector_dim -1;
-        max_for_thread=0;
-        for (i=begin_v; i<=end_v; i++)
+        int i, max_for_thread;
+
+        int *res = malloc(sizeof(int));
+
+        parametros *p = (parametros *)arg;
+
+        for (i=p->ini; i<=p->fin; i++)
             if (v[i]>max_for_thread) max_for_thread=v[i];
 
-        printf("Maximum computed by thread %02d (%u): %07d\n", nthread,
+        printf("Maximum computed by thread %02d (%lu): %07d\n", p->id,
         pthread_self(), max_for_thread);
-        vmax[nthread] = max_for_thread;
 
-        pthread_exit(0);
+        *res = max_for_thread;
+
+        pthread_exit((void**) &res);
     }
 
     int main(int argc, char * argv[])
     {
-        int i, max;
+        int i, max = 0, subvector_dim, num_threads;
         time_t t;
         pthread_t thread[MAX_NUMTHREADS];
+        //CAMBIO
+        parametros param[MAX_NUMTHREADS];
         pthread_attr_t attr;
         pthread_attr_init(&attr); // They are to be joinable
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -639,8 +645,14 @@ $ cat max_vector.c
         subvector_dim = VSIZE / num_threads;
 
         for (i = 0; i < num_threads; i++) // We create threads, it can fail
-        {   index_v[i]=i;
-            if (pthread_create(&thread[i], &attr, f_max, (void *)&index_v[i]))
+        {   param[i].id = i;
+            param[i].begin = i * subvector_dim;
+            if (i == (num_threads - 1)) {
+                param[i].end = VSIZE - 1;
+            } else {
+                param[i].end = param[i].begin + subvector_dim - 1;
+            }
+            if (pthread_create(&thread[i], &attr, f_max, (void *)&param[i]))
             {   printf("On iteration %d: ", i);
                 perror("error creating thread.");
                 exit(-1);
@@ -650,21 +662,34 @@ $ cat max_vector.c
         printf("%d Threads successfully created.\n\n", i);
 
         for (i = 0; i < num_threads; i++) { // We wait for their completion
-            if ( pthread_join(thread[i],NULL ) )
+            int *res_hilo;
+            if ( pthread_join(thread[i], (void **) &res_hilo) )
             {   printf("On iteration %d: ", i); // It can fail
                 perror("error joining thread.");
                 exit(-1);
             }
+            if (*res_hilo > max) {
+                max = *res_hilo;
+            }
+
+            free(res_hilo); /* Liberar la memoria reservada por el hilo */
         }
 
         printf("\n%d Threads successfully joined.\n\n", i);
-
-        max=0;
-        for (i = 0; i < num_threads; i++)
-            // We get the maximum element returned by threads
-            if ( vmax[i] > max ) max = vmax[i];
 
         printf("Final maximum: %d\n", max);
         pthread_attr_destroy(&attr); // To release memory
         exit(0);
     }
+
+
+/*Pregunta: ¿Se podría usar una única variable entera global que actualizara cada hilo
+ *si el valor máximo que ha calculado es mayor que el valor actual de dicha variable? Justifica la respuesta.
+ *
+ *RESPUESTA A LA PREGUNTA: No se podría usar una única variable debido a que se podrían producir condiciones de carrera
+ * si múltiples hilos quisieran comprobar y actualizar simultáneamente la variable global max_global. Además,
+ * varios hilos podrían leer a la vez un dato antiguo de esa variable. Por tanto, la estarían sobreescribiendo continuamente
+ * con datos erróneos. Entonces, la salida sería incorrecta.
+ * De esta manera, si quisiéramos usar una única variable global a la que accedieran todos los hilos, deberíamos emplear
+ * el uso de los mutex o cerrojos dentro de la función void f_max, para proteger la sección crítica del código.
+ */
