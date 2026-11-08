@@ -381,3 +381,103 @@ int main(int argc, char *argv[]) {
 
     exit(0);
 }
+
+//EJERCICIO 5
+
+/*5. Sea el siguiente programa:
+    #include <pthread.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    #define NUMTHREADS 4
+
+    typedef struct interval{
+        int iter;
+        int ini;
+        int fin;
+    } t_interval;
+
+    int suma_parcial[NUMTHREADS];
+    int suma = 0;
+
+    void *hilo(void *arg)
+    {
+        int i;
+        int ini1,fin1, itera;
+        t_interval *inter;
+
+        inter = ((t_interval *) (arg));
+        itera = inter->iter;
+
+        ini1 = inter->ini;
+        fin1 = inter->fin;
+        suma_parcial[itera] = 0;
+
+        for(i=ini1;i<=fin1;i++){
+            suma_parcial[itera] = suma_parcial[itera] + i;
+        }
+        printf("HIlo i=%d, suma = %d\n",itera,suma_parcial[itera]);
+        pthread_exit(0);
+    }
+
+    int main()
+    {
+        pthread_t thread[NUMTHREADS];
+        int ini,fin;
+        int i,elem,inicio;
+        t_interval param[NUMTHREADS];
+
+        printf("Introduce inicio intervalo: ");
+        scanf("%d",&ini);
+
+        printf("Introduce fin intervalo: ");
+        scanf("%d",&fin);
+        elem = ((fin-ini)+1)/NUMTHREADS;
+
+        inicio=ini;
+
+        for (i=0;i<NUMTHREADS;i++)
+        {
+            param[i].iter = i;
+            param[i].ini = inicio;
+
+            if (i==(NUMTHREADS-1)) param[i].fin = fin;
+
+            else param[i].fin = param[i].ini + elem;
+
+            pthread_create(&thread[i], NULL, hilo, (void *) &param[i]);
+            printf("hilo 1 iter = %d, ini = %d, fin = %d\n",param[i].iter,
+            param[i].ini,param[i].fin);
+            inicio = param[i].fin+1;
+        }
+
+        for (i=0; i<NUMTHREADS; i++) pthread_join(thread[i],NULL);
+
+        for (i=0; i<NUMTHREADS; i++) suma = suma + suma_parcial[i];
+        printf("Suma = %d\n ",suma);
+        pthread_exit (0);
+    }
+
+A partir de este programa responde a las siguientes preguntas:
+
+a) Explica la tarea que realiza cada uno de los hilos subordinados. ¿Donde se ´
+almacena el resultado que calcula cada hilo?
+
+SOLUCIÓN: Cada hilo, a partir de un subintervalo, calcula la suma parcial de los elementos de ese intervalo.
+Posterioremente, guarda el resultado en la variable 'suma_parcial'.
+
+b) Cada hilo modifica un elemento del vector suma parcial. ¿Ven estas modificaciones el resto de hilos y la hebra principal?
+
+SOLUCIÓN: El resto de hilos ve las modificaciones sobre 'suma_parcial'. Sin embargo, no usan los mismos datos o posiciones, puesto que cada hilo tiene una posición del vector donde
+se almacena el resultado. De esta manera, no se generan condiciones de carrera entre las variables compartidas.
+
+c) ¿Que resultado muestra por pantalla el programa?
+
+SOLUCIÓN: El programa mostrará por pantalla para cada hilo, sus datos más importantes antes de hacer la suma parcial
+(número de iteración, índice de inicio y de final). Posteriormente, mostrará para cada hilo la suma parcial calculada.
+Por último, cuando estén todas las sumas parciales calculadas, mostrará por pantalla la suma total de todos los elementos del vector.
+
+*/
+
+//EJERCICIO 6
+
