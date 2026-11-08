@@ -152,3 +152,26 @@ int main(int argc, char *argv[]) {
 
     pthread_exit(0);
 }
+
+//EJERCICIO 8
+
+/*8. Modify the previous code so that each thread receives as argument a structure containing
+ *the starting row index of the matrix that it will calculate
+and the number of rows to be generated. Each thread has to return the
+number of multiplications performed during the vector–vector product.
+The main thread will display in the console the number of multiplications
+returned by each worker thread before this main thread prints the result
+of the column vector-row vector product.
+Exercise 14 in the slides of unit 2 could be used as a reference to compute the number
+of rows to be processed by each thread, to pass the arguments to the threads, and to
+collect the data returned by the threads.
+
+
+TRADUCCIÓN DEL ENUNCIADO:
+8. Modifica el código anterior de forma que cada hilo reciba como argumento una estructura que contenga el índice de la
+fila inicial de la matriz que calculará y el número de filas a generar. Cada hilo debe devolver el número de multiplicaciones
+realizadas durante el producto vector-vector. El hilo principal mostrará por consola el número de multiplicaciones devuelto
+por cada hilo trabajador (worker thread) antes de imprimir el resultado del producto del vector columna por el vector fila.
+
+Se puede utilizar como referencia el Ejercicio 14 de las diapositivas del Tema 2 para calcular el número de filas que
+procesará cada hilo, pasar los argumentos a los hilos y recoger los datos devueltos por estos.*/
