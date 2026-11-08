@@ -4,4 +4,5 @@ project(ejercicios C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(ejercicios
-        EJSGESTIONHILOS.c)
+        EJSGESTIONHILOS.c
+        ejsPrac2Lab78.c)
